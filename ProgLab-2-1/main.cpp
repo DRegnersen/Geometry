@@ -35,6 +35,16 @@ namespace geom {
             return *this;
         }
 
+        // equality operator
+        friend bool operator==(const Point &A, const Point &B) {
+            return (A.x == B.x) && (A.y == B.y);
+        }
+
+        // inequality operator
+        friend bool operator!=(const Point &A, const Point &B) {
+            return (A.x != B.x) || (A.y != B.y);
+        }
+
         // summation operator
         friend Point operator+(const Point &A, const Point &B) {
             Point _result_;
@@ -64,6 +74,10 @@ namespace geom {
 
         // ===== FUNCTIONS =====
 
+        double scalar(const Point &_other_) {
+            return this->x * _other_.x + this->y * _other_.y;
+        }
+
         double getX() const {
             return x;
         }
@@ -78,6 +92,97 @@ namespace geom {
 
         void setY(const double &_y_) {
             y = _y_;
+        }
+    };
+
+    class DirectSegment {
+    private:
+        Point begin;
+        Point end;
+    public:
+        // constructor
+        DirectSegment(const Point &_begin_, const Point &_end_) {
+            begin = _begin_;
+            end = _end_;
+        }
+
+        // copy constructor
+        DirectSegment(const DirectSegment &_segment_) : begin(_segment_.begin), end(_segment_.end) {};
+
+        // assignment operator
+        DirectSegment &operator=(const DirectSegment &_segment_) {
+            if (this == &_segment_) {
+                return *this;
+            }
+            begin = _segment_.begin;
+            end = _segment_.end;
+
+            return *this;
+        }
+
+        //multiplication operator (pseudo scalar multiplication)
+        friend double operator*(DirectSegment A, DirectSegment B) {
+            return A.toVector().getX() * B.toVector().getY() -
+                   B.toVector().getX() * A.toVector().getY();
+        }
+
+        // output operator
+        friend ostream &operator<<(ostream &out, const DirectSegment &_segment_) {
+            out << _segment_.begin << " -> " << _segment_.end;
+            return out;
+        }
+
+        // ===== FUNCTIONS =====
+
+        double scalar(DirectSegment _other_) {
+            return this->toVector().getX() * _other_.toVector().getX() +
+                   this->toVector().getY() * _other_.toVector().getY();
+        }
+
+        Point toVector() {
+            return end - begin;
+        }
+
+        DirectSegment &reverse() {
+            swap(begin, end);
+            return *this;
+        }
+
+        bool intersects(DirectSegment _other_) {
+            double min_this, max_this;
+            double min_other, max_other;
+
+            min_this = min(this->begin.getX(), this->end.getX());
+            max_this = max(this->begin.getX(), this->end.getX());
+
+            min_other = min(_other_.begin.getX(), _other_.end.getX());
+            max_other = max(_other_.begin.getX(), _other_.end.getX());
+
+            if (max_this < min_other || max_other < min_this) {
+                return false;
+            }
+
+            min_this = min(this->begin.getY(), this->end.getY());
+            max_this = max(this->begin.getY(), this->end.getY());
+
+            min_other = min(_other_.begin.getY(), _other_.end.getY());
+            max_other = max(_other_.begin.getY(), _other_.end.getY());
+
+            if (max_this < min_other || max_other < min_this) {
+                return false;
+            }
+
+            if (((this->begin - _other_.begin) * this->toVector()) * ((this->begin - _other_.end) * this->toVector()) >
+                0) {
+                return false;
+            }
+
+            if (((_other_.begin - this->begin) * _other_.toVector()) *
+                ((_other_.begin - this->end) * _other_.toVector()) > 0) {
+                return false;
+            }
+
+            return true;
         }
     };
 
@@ -145,7 +250,7 @@ namespace geom {
 
         // ===== FUNCTIONS =====
 
-        long long size() {
+        virtual long long size() {
             return vertexes.size();
         }
 
@@ -167,59 +272,38 @@ namespace geom {
         }
     };
 
-    class ClosedPolyline : Polyline {
-    private:
-        bool isClosed;
+    class ClosedPolyline : protected Polyline {
     public:
         //constructor
-        ClosedPolyline(const Polyline &_line_) : Polyline(_line_) {
-            isClosed = false;
-        }
+        ClosedPolyline(const Polyline &_line_) : Polyline(_line_) {}
 
-        ClosedPolyline(initializer_list<Point> _vertexes_) : Polyline(_vertexes_) {
-            isClosed = false;
-        }
+        ClosedPolyline(initializer_list<Point> _vertexes_) : Polyline(_vertexes_) {}
 
         //copy constructor
-        ClosedPolyline(const ClosedPolyline &_closed_line_) : Polyline(_closed_line_) {
-            isClosed = _closed_line_.isClosed;
-        };
+        ClosedPolyline(const ClosedPolyline &_closed_line_) : Polyline(_closed_line_) {}
 
         // assignment operator
         ClosedPolyline &operator=(const ClosedPolyline &_closed_line_) {
-            if (this == &_closed_line_) {
-                return *this;
-            }
-
-            isClosed = _closed_line_.isClosed;
-
+            Polyline::operator=(_closed_line_);
             return *this;
         }
 
         ClosedPolyline &operator=(const Polyline &_line_) override {
             Polyline::operator=(_line_);
-            isClosed = false;
-
             return *this;
         }
 
         ClosedPolyline &operator=(initializer_list<Point> _vertexes_) override {
             Polyline::operator=(_vertexes_);
-            isClosed = false;
-
             return *this;
         }
 
         // indexing operator
         Point &operator[](const long long &_idx_) override {
-            if (isClosed) {
-                if (_idx_ < 0) {
-                    return Polyline::operator[](((_idx_ % Polyline::size()) + Polyline::size()) % Polyline::size());
-                } else {
-                    return Polyline::operator[](_idx_ % Polyline::size());
-                }
+            if (_idx_ < 0) {
+                return Polyline::operator[](((_idx_ % Polyline::size()) + Polyline::size()) % Polyline::size());
             } else {
-                return Polyline::operator[](_idx_);
+                return Polyline::operator[](_idx_ % Polyline::size());
             }
         }
 
@@ -233,100 +317,33 @@ namespace geom {
                 out << _closed_line_[i];
             }
 
-            if (_closed_line_.isClosed) {
-                out << " >>";
-            }
-            out << "]";
+            out << " >>]";
             return out;
         }
 
         // ===== FUNCTIONS =====
 
-        void close() {
-            isClosed = true;
+        long long size() override {
+            return Polyline::size();
         }
 
-        void elongate(const Point &_vertex_) override {
-            if (isClosed) {
-                cout << "<ClosedPolyline> The line is already closed, so it cannot be elongated" << endl;
-            } else {
-                Polyline::elongate(_vertex_);
-            }
-        }
-
-        double perimeter() {
-            if (!isClosed) {
-                cout << "<ClosedPolyline> The line is not closed yet - perimeter counting is not available" << endl;
-                return -1;
-            } else {
-                double _perimeter_ = Polyline::length();
-                _perimeter_ += sqrt(
-                        pow(operator[](0).getX() - operator[](size() - 1).getX(), 2) +
-                        pow(operator[](0).getY() - operator[](size() - 1).getY(), 2));
-                return _perimeter_;
-            }
+        virtual double perimeter() {
+            double _perimeter_ = Polyline::length();
+            _perimeter_ += sqrt(
+                    pow(operator[](0).getX() - operator[](size() - 1).getX(), 2) +
+                    pow(operator[](0).getY() - operator[](size() - 1).getY(), 2));
+            return _perimeter_;
         }
     };
 
-    class DirectSegment {
+    class Polygon : protected ClosedPolyline {
     private:
-        Point begin;
-        Point end;
-    public:
-        // constructor
-        DirectSegment(const Point &_begin_, const Point &_end_) {
-            begin = _begin_;
-            end = _end_;
-        }
+        string type;
 
-        Point toVector() {
-            return end - begin;
-        }
-
-        friend bool areIntersected(DirectSegment AB, DirectSegment CD) {
-            double min_AB, max_AB;
-            double min_CD, max_CD;
-
-            min_AB = min(AB.begin.getX(), AB.end.getX());
-            max_AB = max(AB.begin.getX(), AB.end.getX());
-
-            min_CD = min(CD.begin.getX(), CD.end.getX());
-            max_CD = max(CD.begin.getX(), CD.end.getX());
-
-            if (max_AB < min_CD || max_CD < min_AB) {
-                return false;
-            }
-
-            min_AB = min(AB.begin.getY(), AB.end.getY());
-            max_AB = max(AB.begin.getY(), AB.end.getY());
-
-            min_CD = min(CD.begin.getY(), CD.end.getY());
-            max_CD = max(CD.begin.getY(), CD.end.getY());
-
-            if (max_AB < min_CD || max_CD < min_AB) {
-                return false;
-            }
-
-            if (((AB.begin - CD.begin) * AB.toVector()) * ((AB.begin - CD.end) * AB.toVector()) > 0) {
-                return false;
-            }
-
-            if (((CD.begin - AB.begin) * CD.toVector()) * ((CD.begin - AB.end) * CD.toVector()) > 0) {
-                return false;
-            }
-
-            return true;
-        }
-    };
-
-    class Polygon : ClosedPolyline {
-    private:
-        vector<Point> vertexes;
-
-        bool isAdequate(Point _new_vertex_) {
-            for (int i = 1; i < (int) vertexes.size() - 1; i++) {
-                if (areIntersected(DirectSegment(vertexes[vertexes.size() - 1], _new_vertex_),
-                                   DirectSegment(vertexes[i - 1], vertexes[i]))) {
+        bool isAdequate(const Point &_new_vertex_) {
+            for (int i = 1; i < size() - 1; i++) {
+                if (DirectSegment(operator[](size() - 1), _new_vertex_).intersects(
+                        DirectSegment(operator[](i - 1), operator[](i)))) {
                     return false;
                 }
             }
@@ -334,67 +351,146 @@ namespace geom {
         }
 
         bool isClosed() {
-            if (vertexes.size() <= 2) {
+            if (size() <= 2) {
                 return false;
             }
-            for (int i = 2; i < (int) vertexes.size() - 1; i++) {
-                if (areIntersected(DirectSegment(vertexes.back(), vertexes[0]),
-                                   DirectSegment(vertexes[i - 1], vertexes[i]))) {
+            for (int i = 2; i < size() - 1; i++) {
+                if (DirectSegment(operator[](size() - 1), operator[](0)).intersects(
+                        DirectSegment(operator[](i - 1), operator[](i)))) {
                     return false;
                 }
             }
             return true;
         }
 
+        static double det(const Point &A, const Point &B) {
+            return A.getX() * B.getY() - B.getX() * A.getY();
+        }
+
     public:
         //constructor
         Polygon(initializer_list<Point> _vertexes_) : ClosedPolyline(_vertexes_) {
-            vertexes.clear();
+            type = "...";
+            clear();
             for (const Point &_point_: _vertexes_) {
-                if (this->isAdequate(_point_)) {
-                    vertexes.push_back(_point_);
+                if (isAdequate(_point_)) {
+                    ClosedPolyline::elongate(_point_);
                 } else {
-                    vertexes.clear();
+                    clear();
                     cout << "<Polygon> The points do not form a polygon" << endl;
                     return;
                 }
             }
             if (!isClosed()) {
-                vertexes.clear();
+                clear();
                 cout << "<Polygon> The points do not form a polygon" << endl;
-                return;
             }
-            close();
         }
 
         //copy constructor
-        Polygon(const Polygon &_polygon_) : ClosedPolyline(_polygon_) {
-            vertexes.clear();
-            vertexes = _polygon_.vertexes;
-        };
+        Polygon(const Polygon &_polygon_) : ClosedPolyline(_polygon_) {};
 
         // assignment operator
-        Polygon &operator=(const Polygon &_polygon_)
+        Polygon &operator=(const Polygon &_polygon_) {
+            ClosedPolyline::operator=(_polygon_);
+            return *this;
+        };
 
-        :
-        ClosedPolyline(_polygon_){
-                if (this == &_polygon_) {
-                    return *this;
+        // equality operator
+        friend bool operator==(Polygon &A, Polygon &B) {
+            return A.area() == B.area();
+        }
+
+        // inequality operator
+        friend bool operator!=(Polygon &A, Polygon &B) {
+            return A.area() != B.area();
+        }
+
+        // less operator
+        friend bool operator<(Polygon &A, Polygon &B) {
+            return A.area() < B.area();
+        }
+
+        // greater operator
+        friend bool operator>(Polygon &A, Polygon &B) {
+            return A.area() > B.area();
+        }
+
+        // output operator
+        friend ostream &operator<<(ostream &out, Polygon &_polygon_) {
+            out << "[" << _polygon_.type << "][";
+            for (int i = 0; i < _polygon_.size(); i++) {
+                if (i != 0) {
+                    out << ", ";
                 }
+                out << _polygon_[i];
+            }
 
-                vertexes = _polygon_.vertexes;
-
-                return *this;
+            out << "]";
+            return out;
         }
 
         // ===== FUNCTIONS =====
 
-        double perimeter() {
-            double _perimeter_ = Polyline::length();
-            _perimeter_ += sqrt(
-                    pow(operator[](0).getX() - operator[](size() - 1).getX(), 2) +
-                    pow(operator[](0).getY() - operator[](size() - 1).getY(), 2));
-            return _perimeter_;
+        long long degree() {
+            return ClosedPolyline::size();
+        }
+
+        double perimeter() override {
+            return ClosedPolyline::perimeter();
+        }
+
+        double area() {
+            double _area_ = 0;
+            for (int i = 0; i < size() - 1; i++) {
+                _area_ += det(operator[](i), operator[](i + 1));
+            }
+
+            return abs(_area_) / 2;
+        }
+
+    protected:
+        void setType(const string &_typename_) {
+            type = _typename_;
+        }
+    };
+
+    class Triangle : public Polygon {
+    public:
+        Triangle(initializer_list<Point> _vertexes_) : Polygon(_vertexes_) {
+            setType("tri");
+            if (_vertexes_.size() != 3) {
+                clear();
+                cout << "<Triangle> The number of vertexes is not equal to 3" << endl;
+            }
+        }
+    };
+
+    class Trapezoid : public Polygon {
+    public:
+        Trapezoid(initializer_list<Point> _vertexes_) : Polygon(_vertexes_) {
+            setType("tpz");
+            if (_vertexes_.size() != 4) {
+                clear();
+                cout << "<Trapezoid> The number of vertexes is not equal to 4" << endl;
+            } else {
+                vector<Point> vertexes;
+                bool first_pair, second_pair;
+
+                for (const Point &_point_: _vertexes_) {
+                    vertexes.push_back(_point_);
+                }
+                first_pair = DirectSegment(vertexes[0], vertexes[1]) *
+                             DirectSegment(vertexes[2], vertexes[3]) == 0;
+
+                second_pair = DirectSegment(vertexes[1], vertexes[2]) *
+                              DirectSegment(vertexes[3], vertexes[0]) == 0;
+
+                if (first_pair == second_pair) {
+                    clear();
+                    cout << "<Trapezoid> The points do not form a trapezoid" << endl;
+                }
+            }
         }
     };
 }
@@ -418,7 +514,6 @@ int main() {
     cl_line = {Point(-1, -1), Point(2, 3)};
     //cl_line.elongate(Point(6, 7));
     cout << cl_line << endl;
-    cl_line.close();
 
     cout << cl_line[-5] << endl;
 
@@ -428,12 +523,20 @@ int main() {
     DirectSegment AB(Point(0, 0), Point(0, 4));
     DirectSegment CD(Point(0, 1), Point(5, 1));
 
-    Polygon new_polygon = {Point(0, 0), Point(2, 2), Point(3, 1), Point(2, 1)};
+    Polygon square = {Point(0, 0), Point(0, 2), Point(2, 2), Point(2, 0)};
 
-    if (areIntersected(AB, CD)) {
+    if (AB.intersects(CD)) {
         cout << "YES!" << endl;
     } else {
         cout << "NO" << endl;
     }
+    cout << square << endl;
+    Triangle ABC = {Point(0, 0), Point(2, 2), Point(4, 0)};
+    Trapezoid ABCD = {Point(0, 0), Point(2, 2), Point(4, 2), Point(6, 0)};
+
+    AB.scalar(CD);
+
+    cout << ABC << endl;
+    cout << ABCD << endl;
     return 0;
 }
