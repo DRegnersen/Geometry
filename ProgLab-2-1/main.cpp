@@ -133,6 +133,9 @@ namespace geom {
         }
 
         // ===== FUNCTIONS =====
+        double length() {
+            return sqrt(pow(end.getX() - begin.getX(), 2) + pow(end.getY() - begin.getY(), 2));
+        }
 
         double scalar(DirectSegment _other_) {
             return this->toVector().getX() * _other_.toVector().getX() +
@@ -519,6 +522,29 @@ namespace geom {
             setType("reg");
         }
 
+        RegularPolygon(initializer_list<Point> _vertexes_) : Polygon(_vertexes_) {
+            setType("reg");
+            vector<Point> vertexes;
+            double prev;
+
+            for (const Point &_point_: _vertexes_) {
+                vertexes.push_back(_point_);
+            }
+
+            for (int i = 1; i < vertexes.size(); i++) {
+                if (i == 1) {
+                    prev = DirectSegment(vertexes[i - 1], vertexes[i]).length();
+                } else {
+                    if (DirectSegment(vertexes[i - 1], vertexes[i]).length() != prev) {
+                        clear();
+                        cout << "<RegularPolygon> The points do not form a regular polygon" << endl;
+                        return;
+                    }
+                }
+
+            }
+        }
+
         RegularPolygon(int n, const Point &center, double side_len) : Polygon() {
             setType("reg");
 
@@ -557,48 +583,5 @@ namespace geom {
 int main() {
     using namespace geom;
 
-    Point A(1, 2);
-    Point B(7, 9);
-
-    Polyline line({A, B, Point(-8, 7)});
-    line = {Point(6, 7), Point(9, 10), Point(-7, 49)};
-
-    Polyline line_2 = {Point(-81, 9), Point(6, 7)};
-
-    cout << line.length() << endl;
-
-    ClosedPolyline cl_line = {A, B};
-    ClosedPolyline cl_line_2 = {A, B, Point(3, 4)};
-
-    cl_line = {Point(-1, -1), Point(2, 3)};
-    //cl_line.elongate(Point(6, 7));
-    cout << cl_line << endl;
-
-    cout << cl_line[-5] << endl;
-
-    cout << cl_line.perimeter() << endl;
-    cout << line << endl;
-
-    DirectSegment AB(Point(0, 0), Point(0, 4));
-    DirectSegment CD(Point(0, 1), Point(5, 1));
-
-    Polygon square = {Point(0, 0), Point(0, 2), Point(2, 2), Point(2, 0)};
-
-    if (AB.intersects(CD)) {
-        cout << "YES!" << endl;
-    } else {
-        cout << "NO" << endl;
-    }
-    cout << square << endl;
-    Triangle ABC = {Point(0, 0), Point(2, 2), Point(4, 0)};
-    Trapezoid ABCD = {Point(0, 0), Point(2, 2), Point(4, 2), Point(6, 0)};
-
-    AB.scalar(CD);
-
-    cout << ABC << endl;
-    cout << ABCD << endl;
-
-    RegularPolygon some_regular(10, Point(0, 0), 4);
-    cout << some_regular << endl;
     return 0;
 }
