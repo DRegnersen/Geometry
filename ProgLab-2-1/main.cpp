@@ -191,6 +191,8 @@ namespace geom {
         vector<Point> vertexes;
     public:
         //constructor
+        Polyline() {}
+
         Polyline(initializer_list<Point> _vertexes_) {
             vertexes.clear();
             for (const Point &_point_: _vertexes_) {
@@ -275,6 +277,8 @@ namespace geom {
     class ClosedPolyline : protected Polyline {
     public:
         //constructor
+        ClosedPolyline() : Polyline() {}
+
         ClosedPolyline(const Polyline &_line_) : Polyline(_line_) {}
 
         ClosedPolyline(initializer_list<Point> _vertexes_) : Polyline(_vertexes_) {}
@@ -369,6 +373,8 @@ namespace geom {
 
     public:
         //constructor
+        Polygon() : ClosedPolyline() {}
+
         Polygon(initializer_list<Point> _vertexes_) : ClosedPolyline(_vertexes_) {
             type = "...";
             clear();
@@ -453,10 +459,18 @@ namespace geom {
         void setType(const string &_typename_) {
             type = _typename_;
         }
+
+        void add(Point _point_) {
+            elongate(_point_);
+        }
     };
 
     class Triangle : public Polygon {
     public:
+        Triangle() : Polygon() {
+            setType("tri");
+        }
+
         Triangle(initializer_list<Point> _vertexes_) : Polygon(_vertexes_) {
             setType("tri");
             if (_vertexes_.size() != 3) {
@@ -468,6 +482,10 @@ namespace geom {
 
     class Trapezoid : public Polygon {
     public:
+        Trapezoid() : Polygon() {
+            setType("tpz");
+        }
+
         Trapezoid(initializer_list<Point> _vertexes_) : Polygon(_vertexes_) {
             setType("tpz");
             if (_vertexes_.size() != 4) {
@@ -492,6 +510,47 @@ namespace geom {
                 }
             }
         }
+    };
+
+    class RegularPolygon : public Polygon {
+    public:
+        // constructor
+        RegularPolygon() : Polygon() {
+            setType("reg");
+        }
+
+        RegularPolygon(int n, const Point &center, double side_len) : Polygon() {
+            setType("reg");
+
+            double x = side_len / 2;
+            double y = side_len * tan(((n - 2) * M_PI) / (2 * n)) / 2;
+
+            add(Point(x + center.getX(), y + center.getY()));
+
+            double cs, sn;
+            double new_x, new_y;
+            for (int i = 0; i < n - 1; i++) {
+                cs = cos(2 * M_PI / n);
+                sn = sin(2 * M_PI / n);
+
+                new_x = x * cs - y * sn;
+                new_y = x * sn + y * cs;
+
+                add(Point(new_x + center.getX(), new_y + center.getY()));
+
+                x = new_x;
+                y = new_y;
+            }
+        }
+
+        // copy constructor
+        RegularPolygon(const Polygon &_polygon_) : Polygon(_polygon_) {};
+
+        // assignment operator
+        RegularPolygon &operator=(const RegularPolygon &_polygon_) {
+            Polygon::operator=(_polygon_);
+            return *this;
+        };
     };
 }
 
@@ -538,5 +597,8 @@ int main() {
 
     cout << ABC << endl;
     cout << ABCD << endl;
+
+    RegularPolygon some_regular(10, Point(0, 0), 4);
+    cout << some_regular << endl;
     return 0;
 }
