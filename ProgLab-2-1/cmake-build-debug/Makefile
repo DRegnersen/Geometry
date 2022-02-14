@@ -128,6 +128,30 @@ ProgLab_2_1/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\ProgLab_2_1.dir\build.make CMakeFiles/ProgLab_2_1.dir/build
 .PHONY : ProgLab_2_1/fast
 
+geometry.obj: geometry.cpp.obj
+.PHONY : geometry.obj
+
+# target to build an object file
+geometry.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\ProgLab_2_1.dir\build.make CMakeFiles/ProgLab_2_1.dir/geometry.cpp.obj
+.PHONY : geometry.cpp.obj
+
+geometry.i: geometry.cpp.i
+.PHONY : geometry.i
+
+# target to preprocess a source file
+geometry.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\ProgLab_2_1.dir\build.make CMakeFiles/ProgLab_2_1.dir/geometry.cpp.i
+.PHONY : geometry.cpp.i
+
+geometry.s: geometry.cpp.s
+.PHONY : geometry.s
+
+# target to generate assembly for a file
+geometry.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\ProgLab_2_1.dir\build.make CMakeFiles/ProgLab_2_1.dir/geometry.cpp.s
+.PHONY : geometry.cpp.s
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -161,6 +185,9 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... ProgLab_2_1
+	@echo ... geometry.obj
+	@echo ... geometry.i
+	@echo ... geometry.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "C:/Users/deofr/C++/ProgLab-2-1/geometry.cpp" "C:/Users/deofr/C++/ProgLab-2-1/cmake-build-debug/CMakeFiles/ProgLab_2_1.dir/geometry.cpp.obj"
   "C:/Users/deofr/C++/ProgLab-2-1/main.cpp" "C:/Users/deofr/C++/ProgLab-2-1/cmake-build-debug/CMakeFiles/ProgLab_2_1.dir/main.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

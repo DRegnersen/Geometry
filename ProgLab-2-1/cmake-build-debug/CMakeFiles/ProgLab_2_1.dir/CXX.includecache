@@ -6,11 +6,19 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/deofr/C++/ProgLab-2-1/main.cpp
+C:/Users/deofr/C++/ProgLab-2-1/geometry.cpp
+geometry.h
+C:/Users/deofr/C++/ProgLab-2-1/geometry.h
+cmath
+-
+
+C:/Users/deofr/C++/ProgLab-2-1/geometry.h
 iostream
 -
 vector
 -
-cmath
--
+
+C:/Users/deofr/C++/ProgLab-2-1/main.cpp
+geometry.h
+C:/Users/deofr/C++/ProgLab-2-1/geometry.h
 

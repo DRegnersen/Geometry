@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/ProgLab_2_1.dir/geometry.cpp.obj"
   "CMakeFiles/ProgLab_2_1.dir/main.cpp.obj"
   "ProgLab_2_1.exe"
   "ProgLab_2_1.exe.manifest"

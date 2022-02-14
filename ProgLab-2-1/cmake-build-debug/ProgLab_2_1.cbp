@@ -82,6 +82,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="C:/Users/deofr/C++/ProgLab-2-1/geometry.cpp">
+			<Option target="ProgLab_2_1"/>
+		</Unit>
+		<Unit filename="C:/Users/deofr/C++/ProgLab-2-1/geometry.h">
+			<Option target="ProgLab_2_1"/>
+		</Unit>
 		<Unit filename="C:/Users/deofr/C++/ProgLab-2-1/main.cpp">
 			<Option target="ProgLab_2_1"/>
 		</Unit>
